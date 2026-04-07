@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =========================
+         STANDARD CALENDAR VIEW (Fallback)
+    ========================== -->
+    <record id="view_product_slot_calendar_standard" model="ir.ui.view">
+        <field name="name">product.slot.calendar.standard</field>
+        <field name="model">product.slot</field>
+        <field name="arch" type="xml">
+            <calendar string="Lane Bookings"
+                      date_start="date"
+                      color="lane_name"
+                      mode="month"
+                      quick_create="false">
+                <field name="lane_name"/>
+                <field name="time_slot"/>
+                <field name="user_id"/>
+                <field name="product_id"/>
+                <field name="is_paid"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- =========================
+         LIST VIEW
+    ========================== -->
+    <record id="view_product_slot_list_admin" model="ir.ui.view">
+        <field name="name">product.slot.list.admin</field>
+        <field name="model">product.slot</field>
+        <field name="arch" type="xml">
+            <list string="Lane Bookings"
+                  decoration-success="is_paid == True"
+                  decoration-warning="is_booked == True and is_paid == False">
+
+                <field name="date"/>
+                <field name="time_slot"/>
+                <field name="lane_name"/>
+                <field name="user_id"/>
+                <field name="product_id"/>
+                <field name="sale_id"/>
+                <field name="is_booked"/>
+                <field name="is_paid"/>
+
+            </list>
+        </field>
+    </record>
+
+    <!-- =========================
+         FORM VIEW
+    ========================== -->
+    <record id="view_product_slot_form_admin" model="ir.ui.view">
+        <field name="name">product.slot.form.admin</field>
+        <field name="model">product.slot</field>
+        <field name="arch" type="xml">
+            <form string="Lane Booking Details">
+                <header>
+                    <field name="is_paid" widget="statusbar" clickable="1"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="lane_name" placeholder="Lane Name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Booking Information">
+                            <field name="date"/>
+                            <field name="time_slot"/>
+                            <field name="event_type"/>
+                            <field name="dayname" invisible="event_type != 'monthly'"/>
+                        </group>
+
+                        <group string="Customer &amp; Product">
+                            <field name="user_id"/>
+                            <field name="product_id"/>
+                            <field name="product_name"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Sale Information">
+                            <field name="sale_id"/>
+                            <field name="is_booked"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- =========================
+         SEARCH VIEW
+    ========================== -->
+    <record id="view_product_slot_search_admin" model="ir.ui.view">
+        <field name="name">product.slot.search.admin</field>
+        <field name="model">product.slot</field>
+        <field name="arch" type="xml">
+            <search string="Search Bookings">
+
+                <field name="lane_name" string="Lane" filter_domain="[('lane_name', 'ilike', self)]"/>
+                <field name="user_id" string="Client"/>
+                <field name="product_id"/>
+                <field name="date"/>
+                <field name="time_slot"/>
+                <field name="sale_id"/>
+
+                <filter string="Booked" name="filter_booked" domain="[('is_booked', '=', True)]"/>
+                <filter string="Paid" name="filter_paid" domain="[('is_paid', '=', True)]"/>
+                <filter string="Unpaid" name="filter_unpaid"
+                        domain="[('is_paid', '=', False), ('is_booked', '=', True)]"/>
+
+                <separator/>
+
+                <filter string="Today" name="filter_today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+
+                <filter string="This Week" name="filter_week"
+                        domain="[('date', '&gt;=', (context_today() - relativedelta(weeks=0, weekday=0)).strftime('%Y-%m-%d')),
+                                 ('date', '&lt;=', (context_today() + relativedelta(weeks=0, weekday=6)).strftime('%Y-%m-%d'))]"/>
+
+                <filter string="This Month" name="filter_month"
+                        domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+                <separator/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Lane" name="group_lane" context="{'group_by': 'lane_name'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'user_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                    <filter string="Payment Status" name="group_payment" context="{'group_by': 'is_paid'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <!-- =========================
+         ACTIONS
+    ========================== -->
+
+    <!-- Standard Calendar Action -->
+    <record id="action_standard_booking_calendar" model="ir.actions.act_window">
+        <field name="name">Standard Calendar</field>
+        <field name="res_model">product.slot</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="domain">[('is_booked', '=', True)]</field>
+        <field name="context">{'search_default_filter_booked': 1}</field>
+
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'calendar', 'view_id': ref('view_product_slot_calendar_standard')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_product_slot_list_admin')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_product_slot_form_admin')})
+        ]"/>
+
+        <field name="search_view_id" ref="view_product_slot_search_admin"/>
+    </record>
+
+    <!-- Custom Calendar Widget Action (MAIN ONE) -->
+    <record id="action_custom_booking_calendar" model="ir.actions.client">
+        <field name="name">Booking Calendar</field>
+        <field name="tag">booking_calendar_widget</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- All Bookings List Action -->
+    <record id="action_all_bookings" model="ir.actions.act_window">
+        <field name="name">All Bookings</field>
+        <field name="res_model">product.slot</field>
+        <field name="view_mode">list,form,calendar</field>
+
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_product_slot_list_admin')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_product_slot_form_admin')}),
+            (0, 0, {'view_mode': 'calendar', 'view_id': ref('view_product_slot_calendar_standard')})
+        ]"/>
+
+        <field name="search_view_id" ref="view_product_slot_search_admin"/>
+    </record>
+
+    <!-- =========================
+         MENUS
+    ========================== -->
+
+    <!-- Root Menu -->
+    <menuitem id="menu_lane_rentals_root"
+              name="Lane Rental Dashboard"
+              sequence="10"
+              groups="base.group_user"/>
+
+    <!-- MAIN MENU - Custom Calendar -->
+    <menuitem id="menu_booking_calendar"
+              name="Booking Calendar"
+              parent="menu_lane_rentals_root"
+              action="action_custom_booking_calendar"
+              sequence="5"
+              groups="base.group_user"/>
+
+    <!-- Standard Calendar -->
+    <!-- <menuitem id="menu_standard_calendar"
+              name="Standard View"
+              parent="menu_lane_rentals_root"
+              action="action_standard_booking_calendar"
+              sequence="10"
+              groups="base.group_user"/> -->
+
+    <!-- All Bookings -->
+    <menuitem id="menu_all_bookings"
+              name="All Bookings"
+              parent="menu_lane_rentals_root"
+              action="action_all_bookings"
+              sequence="20"
+              groups="base.group_user"/>
+
+</odoo>

@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="lane_booking_calendar.BookingCalendarWidget">
+
+        <div class="booking-calendar-container p-4">
+
+            <!-- ================= NEW HEADER LAYOUT ================= -->
+            
+            <!-- Row 1: Month Title with Navigation -->
+            <div class="header-row-1">
+               
+                <h2 class="calendar-title-left" t-esc="getMonthName()"/>
+            </div>
+
+            <!-- Row 2: Search, Filters, View Modes -->
+            <div class="header-row-2">
+
+    <!-- CENTER: Today, Search, Navigation -->
+    <div class="header-center">
+        <button class="nav-btn" t-on-click="prev">‹</button>
+        <button class="today-btn" t-on-click="goToToday">Today</button>
+        <button class="nav-btn" t-on-click="next">›</button>
+        <input type="text"
+               class="search-input"
+               placeholder="Search..."
+               t-on-input="onSearchInput"/>
+    </div>
+
+    <!-- RIGHT: View Mode Switches -->
+    <div class="header-right">
+        <button class="view-switch"
+                t-att-class="state.viewMode === 'day' ? 'active' : ''"
+                t-on-click="() => this.changeView('day')">Day</button>
+
+        <button class="view-switch"
+                t-att-class="state.viewMode === 'week' ? 'active' : ''"
+                t-on-click="() => this.changeView('week')">Week</button>
+
+        <button class="view-switch"
+                t-att-class="state.viewMode === 'month' ? 'active' : ''"
+                t-on-click="() => this.changeView('month')">Month</button>
+    </div>
+
+</div>
+
+<!-- Filter By Lane Section -->
+<div class="filter-row">
+    <span class="filter-title">Filter By Lane:</span>
+
+    <button class="lane-pill"
+            t-att-class="state.selectedLane === 'all' ? 'active' : ''"
+            t-on-click="selectAllLanes">
+        All
+    </button>
+
+    <t t-foreach="state.lanes" t-as="lane" t-key="lane">
+        <button class="lane-pill"
+                t-att-style="'border-color:' + getLaneColor(lane)"
+                t-att-class="state.selectedLane === lane ? 'active' : ''"
+                t-on-click="selectLane"
+                t-att-data-lane="lane">
+            <t t-esc="lane"/>
+        </button>
+    </t>
+</div>
+
+            <!-- ================= CALENDAR GRID ================= -->
+
+            <!-- MONTH VIEW -->
+            <t t-if="state.viewMode === 'month'">
+
+                <div class="month-view calendar-grid">
+
+                    <!-- Weekdays Header Row -->
+                    <div class="weekdays-header">
+                        <div class="weekday-cell">Sun</div>
+                        <div class="weekday-cell">Mon</div>
+                        <div class="weekday-cell">Tue</div>
+                        <div class="weekday-cell">Wed</div>
+                        <div class="weekday-cell">Thu</div>
+                        <div class="weekday-cell">Fri</div>
+                        <div class="weekday-cell">Sat</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px;">
+
+                        <t t-foreach="getDaysInMonth()" t-as="day" t-key="day_index">
+
+                            <div class="calendar-day"
+                                 t-att-class="(day.isOtherMonth ? 'opacity-40 ' : '') + (day.isToday ? ' border-blue-600' : '')"
+                                 t-att-style="'grid-column: ' + ((day.date.getDay() + 1))">
+
+                                <!-- DATE NUMBER -->
+                                <div class="day-number-header">
+                                    <span class="day-number"><t t-esc="day.day"/></span>
+                                    <t t-if="day.isToday">
+                                        <span class="today-badge">Today</span>
+                                    </t>
+                                </div>
+
+
+                                <div class="space-y-1 bookings-scroll">
+                                    <t t-foreach="day.bookings || []" t-as="booking" t-key="booking.id">
+
+                                        <!-- booking-card with side color bar -->
+                                        <div class="booking-card"
+                                             t-if="matchSearch(booking)"
+                                             t-att-data-booking-id="booking.id"
+                                             t-on-click="onBookingClick">
+
+                                            <div class="booking-color"
+                                                 t-att-style="'background:' + (booking.lane_color || '#6366F1')">
+                                            </div>
+
+                                            <div class="booking-content">
+                                                <div class="booking-title">
+                                                    <t t-esc="booking.lane_name"/>
+                                                </div>
+
+                                                <div class="booking-name">
+                                                    <t t-esc="booking.user_name"/>
+                                                    <t t-if="booking.addons_info">
+                                                        <span style="font-size: 1em; color: #d97706;"><t t-esc="booking.addons_info"/></span>
+                                                    </t>
+                                                </div>
+
+                                                <div class="booking-meta text-[10px]" style="color:#555;">
+                                                    <t t-esc="booking.time_slot"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </t>
+                                </div>
+
+                            </div>
+
+                        </t>
+
+                    </div>
+
+                </div>
+
+            </t>
+
+            <!-- WEEK VIEW -->
+            <t t-if="state.viewMode === 'week'">
+
+                <div class="week-view calendar-grid">
+
+                    <div class="grid grid-cols-7 text-center font-semibold mb-2">
+                        <t t-foreach="getWeekDays()" t-as="day" t-key="day.date">
+                            <div>
+                                <div><t t-esc="day.label"/></div>
+                                <div class="text-xs text-gray-500"><t t-esc="day.dateStr"/></div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-2">
+                        <t t-foreach="getWeekDays()" t-as="day" t-key="day.date">
+                            <div class="border rounded p-1 min-h-[400px] bookings-scroll">
+
+                                <t t-foreach="day.bookings || []" t-as="booking" t-key="booking.id">
+                                    <div class="booking-card"
+                                         t-if="matchSearch(booking)"
+                                         t-att-data-booking-id="booking.id"
+                                         t-on-click="onBookingClick">
+
+                                        <div class="booking-color"
+                                             t-att-style="'background:' + (booking.lane_color || '#6366F1')">
+                                        </div>
+
+                                        <div class="booking-content">
+                                            <div class="booking-title" style="font-size:13px;">
+                                                <t t-esc="booking.user_name"/>
+                                            </div>
+
+                                            <div class="booking-name">
+                                                <t t-esc="booking.product_name"/>
+                                                <t t-if="booking.addons_info">
+                                                    <span style="font-size: 1em; color: #d97706;"><t t-esc="booking.addons_info"/></span>
+                                                </t>
+                                            </div>
+
+                                            <div class="booking-meta text-[10px]" style="color:#666;">
+                                                <t t-esc="booking.lane_name"/> | <t t-esc="booking.time_slot"/>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </t>
+
+                            </div>
+                        </t>
+                    </div>
+
+                </div>
+
+            </t>
+
+            <!-- DAY VIEW -->
+            <t t-if="state.viewMode === 'day'">
+
+                <div class="day-view-container">
+
+                    <h3 class="font-semibold mb-3">
+                        <t t-esc="formatFullDate(state.currentDate)"/>
+                    </h3>
+
+                    <div class="space-y-2 bookings-scroll">
+                        <t t-foreach="getDayBookings()" t-as="booking" t-key="booking.id">
+
+                            <div class="booking-card"
+                                 t-if="matchSearch(booking)"
+                                 t-att-data-booking-id="booking.id"
+                                 t-on-click="onBookingClick"
+                                 t-att-style="'background:' + (booking.lane_color || '#F3F4F6')">
+
+                                <div class="booking-color"
+                                     t-att-style="'background:' + (booking.lane_color || '#6366F1')">
+                                </div>
+
+                                <div class="booking-content">
+                                    <div class="booking-title" style="font-size:16px;">
+                                        <t t-esc="booking.user_name"/>
+                                    </div>
+
+                                    <div class="booking-name">
+                                        <t t-esc="booking.product_name"/>
+                                        <t t-if="booking.addons_info">
+                                            <span style="font-size: 1em; color: #d97706;"><t t-esc="booking.addons_info"/></span>
+                                        </t>
+                                    </div>
+
+                                    <div class="booking-meta text-xs" style="color:#374151;">
+                                        <t t-esc="booking.lane_name"/> | <t t-esc="booking.time_slot"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </t>
+                    </div>
+
+                </div>
+
+            </t>
+
+            <!-- ================= BOOKING POPUP MODAL (FIXED DESIGN) ================= -->
+            <t t-if="state.showPopup and state.selectedBooking">
+                <div class="modal-bg" 
+                     style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 9999; background: rgba(0,0,0,0.5);"
+                     t-on-click="closePopup">
+
+                    <div class="modal-box" 
+                         style="background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); width: 450px; max-width: 90%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;"
+                         t-on-click.stop="">
+
+                        <!-- Popup Header -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; background: white;">
+                            <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Booking Details</h2>
+                            <button t-on-click="closePopup"
+                                    style="cursor: pointer; background: none; border: none; font-size: 24px; font-weight: bold; color: #9ca3af; padding: 0; line-height: 1; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                                ×
+                            </button>
+                        </div>
+
+                        <!-- Popup Content -->
+                        <div class="booking-popup" style="padding: 20px; overflow-y: auto; flex: 1;">
+
+                            <!-- User Name -->
+                            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Customer Name</label>
+                                <p style="margin: 0; font-size: 16px; font-weight: 600; color: #111827;">
+                                    <t t-esc="state.selectedBooking.user_name || 'N/A'"/>
+                                </p>
+                            </div>
+
+                            <!-- Product -->
+                            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Product</label>
+                                <p style="margin: 0; font-size: 14px; font-weight: 500; color: #374151;">
+                                    <t t-esc="state.selectedBooking.product_name || 'N/A'"/>
+                                </p>
+                            </div>
+
+                            <!-- Addons -->
+                            <div t-if="state.selectedBooking.addons_info" style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Add-ons</label>
+                                <p style="margin: 0; font-size: 14px; font-weight: 500; color: #d97706;">
+                                    <t t-esc="state.selectedBooking.addons_info"/>
+                                </p>
+                            </div>
+
+                            <!-- Lane -->
+                            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Lane</label>
+                                <p style="margin: 0; font-size: 14px; color: #374151; display: flex; align-items: center; gap: 8px;">
+                                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px;" t-att-style="'background:' + (state.selectedBooking.lane_color || '#6366F1')"></span>
+                                    <t t-esc="state.selectedBooking.lane_name || 'N/A'"/>
+                                </p>
+                            </div>
+
+                            <!-- Date -->
+                            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Date</label>
+                                <p style="margin: 0; font-size: 14px; color: #374151;">
+                                    <t t-esc="state.selectedBooking.date || 'N/A'"/>
+                                </p>
+                            </div>
+
+                            <!-- Time Slots (Multiple) -->
+                            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Time Slots</label>
+                                
+                                <t t-if="state.selectedBooking.individual_slots">
+                                    <div t-foreach="state.selectedBooking.individual_slots" t-as="slot" t-key="slot_index"
+                                        style="margin-bottom: 6px; padding: 8px 12px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #6366f1;">
+                                        <p style="margin: 0; font-size: 14px; color: #374151; font-weight: 500;">
+                                            <span style="color: #6366f1; font-weight: 600;">Slot <t t-esc="slot_index + 1"/>:</span>
+                                            <t t-esc="slot.display"/>
+                                        </p>
+                                    </div>
+                                </t>
+                                
+                                <t t-else="">
+                                    <p style="margin: 0; font-size: 14px; color: #374151;">
+                                        <t t-esc="state.selectedBooking.time_slot || 'N/A'"/>
+                                    </p>
+                                </t>
+                            </div>
+
+                            <!-- Sale Order -->
+                            <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Sale Order</label>
+                                <p style="margin: 0; font-size: 14px; color: #374151;">
+                                    <t t-esc="state.selectedBooking.sale_id || 'N/A'"/>
+                                </p>
+                            </div>
+
+                            <!-- Status -->
+                            <div style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 11px; color: #9ca3af; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Status</label>
+                                <p style="margin: 0;">
+                                    <span t-att-style="state.selectedBooking.is_booked ? 'display: inline-block; padding: 5px 14px; border-radius: 16px; font-size: 13px; font-weight: 600; background: #d1fae5; color: #065f46;' : 'display: inline-block; padding: 5px 14px; border-radius: 16px; font-size: 13px; font-weight: 600; background: #f3f4f6; color: #6b7280;'">
+                                        <t t-if="state.selectedBooking.is_booked">✓ Booked</t>
+                                        <t t-else="state.selectedBooking.user_name">✓ Booked</t>
+                                    </span>
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <!-- Popup Footer -->
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #e5e7eb; background: #f9fafb;">
+                            <button t-on-click="closePopup"
+                                    style="cursor: pointer; padding: 8px 16px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; transition: 0.2s;">
+                                Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </t>
+
+        </div>
+
+    </t>
+
+</templates>
