@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_slot_calendar_user,product.slot.calendar.user,us_arena_website.model_product_slot,base.group_user,1,0,0,0
+access_product_slot_calendar_manager,product.slot.calendar.manager,us_arena_website.model_product_slot,sales_team.group_sale_manager,1,1,1,1
