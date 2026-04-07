@@ -1,0 +1,451 @@
+/* ================= BASE ================= */
+
+.booking-calendar-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #F5F7FB;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+/* ================== NEW HEADER LAYOUT ================== */
+
+/* Row 1: Month Title with Navigation on Left */
+.header-row-1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.calendar-title-left {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    margin-left: 20px;
+}
+
+/* Row 2: Search, Filters, View Modes */
+.header-row-2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    /* justify-content: center; */
+    flex-wrap: wrap;
+}
+
+.header-right {
+    display: flex;
+    gap: 6px;
+}
+
+.filter-separator {
+    color: #D1D5DB;
+    font-size: 18px;
+    margin: 0 5px;
+}
+
+.today-badge {
+    font-size: 10px;
+    background: #2563eb;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+}
+
+/* ================== BUTTONS & INPUTS ================== */
+
+.week-view .bookings-scroll,
+.month-view .bookings-scroll {
+    max-height: 70px;
+    overflow-y: auto;
+}
+
+/* Nice scrollbar */
+.bookings-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bookings-scroll::-webkit-scrollbar-thumb {
+  background: #c7d2fe;
+  border-radius: 10px;
+}
+
+.nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #E5E7EB;
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: #F3F4F6;
+}
+
+.today-btn {
+    background: #2563eb;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.today-btn:hover {
+    background: #1d4ed8;
+}
+
+.search-input {
+    padding: 8px 15px;
+    border-radius: 20px;
+    width: 30%;
+    border: 1px solid #E5E7EB;
+    outline: none;
+    min-width: 200px;
+}
+
+.view-switch {
+    padding: 6px 15px;
+    border-radius: 15px;
+    border: 1px solid #E5E7EB;
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.view-switch:hover {
+    background: #F3F4F6;
+}
+
+.view-switch.active {
+    background: #111827;
+    color: white;
+}
+
+/* ================= FILTER BAR ================== */
+
+.filter-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.lane-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 2px solid #E5E7EB;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.lane-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lane-pill.active {
+    background: #111827;
+    color: white;
+    border-color: #111827;
+}
+
+
+/* ================== CALENDAR GRID ================= */
+
+.calendar-grid {
+    background: #F9FAFB;
+    padding: 15px;
+    border-radius: 20px;
+}
+
+/* Weekdays Header Row - FIXED TO MATCH GRID */
+.weekdays-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.weekday-cell {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    padding: 8px;
+}
+
+/* FIXED: Grid for calendar days */
+.grid {
+    display: grid;
+}
+
+.grid-cols-7 {
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.calendar-day {
+    background: white;
+    border-radius: 12px;
+    padding: 8px;
+    min-height: 80px;
+    transition: 0.2s;
+    border: 1px solid #E5E7EB;
+}
+
+.calendar-day:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.calendar-day.opacity-40 {
+    background: #F9FAFB;
+}
+
+/* Day number header */
+.day-number-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.day-number {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* Today's highlight */
+.calendar-day.border-blue-600 {
+    background: #EDE9FE !important;
+    border: 1px solid #6366F1 !important;
+}
+
+/* ================= BOOKING CARD ================= */
+
+.booking-card {
+    display: flex;
+    gap: 8px;
+    background: #F3F4F6;
+    border-radius: 10px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.booking-card:hover {
+    background: #ECEEF3;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.booking-color {
+    width: 6px;
+    border-radius: 6px;
+}
+
+.booking-content {
+    flex: 1;
+}
+
+.booking-title {
+    font-weight: 600;
+    font-size: 12px;
+    color: #111827;
+}
+
+.booking-name {
+    font-size: 11px;
+    color: #4B5563;
+}
+
+.booking-meta {
+    font-size: 10px;
+    color: #6B7280;
+}
+
+/* ================= WEEK VIEW ================= */
+
+.grid-cols-7 > div.border.rounded {
+    background: white;
+    border-radius: 12px;
+    min-height: 380px;
+    padding: 10px;
+}
+
+.border {
+    border: 1px solid #E5E7EB;
+}
+
+.rounded {
+    border-radius: 12px;
+}
+
+.min-h-\[400px\] {
+    min-height: 400px;
+}
+
+/* ================= DAY VIEW ================= */
+
+.day-view-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.day-view-container .bookings-scroll {
+    height: 600px;
+    max-height: none !important;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.day-view-container h3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.space-y-1 > * + * {
+    margin-top: 0.25rem;
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 0.75rem;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.text-gray-500 {
+    color: #6B7280;
+}
+
+/* ================= MODAL ================= */
+
+.modal-bg {
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-box {
+    border-radius: 15px;
+}
+
+/* ================= SCROLLBAR ================= */
+
+.bookings-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.bookings-container::-webkit-scrollbar-track {
+    background: #F3F4F6;
+}
+
+.bookings-container::-webkit-scrollbar-thumb {
+    background: #9CA3AF;
+    border-radius: 2px;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.booking-card {
+    animation: slideIn 0.25s ease;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1000px) {
+    .header-row-2 {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header-center {
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .search-input {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .header-right {
+        justify-content: center;
+    }
+}
+
+
+/* Filter Row Styling */
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+/* If you want colored borders for lane pills */
+.lane-pill[style*="border-color"].active {
+    background-color: #fff;
+    color: #1f2937;
+    border-width: 2px;
+}
